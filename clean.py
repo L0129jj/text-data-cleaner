@@ -3,10 +3,22 @@ from pathlib import Path
 
 
 def read_text_lines(file_path: str) -> list[str]:
-    """Read all lines from a UTF-8 text file."""
+    """Read all lines with UTF-8 first, then GBK as a fallback."""
     path = Path(file_path)
-    with path.open("r", encoding="utf-8") as file:
-        return file.readlines()
+    encodings = ("utf-8", "gbk")
+    last_decode_error: UnicodeDecodeError | None = None
+
+    for encoding in encodings:
+        try:
+            with path.open("r", encoding=encoding) as file:
+                return file.readlines()
+        except UnicodeDecodeError as error:
+            last_decode_error = error
+
+    if last_decode_error is not None:
+        raise ValueError("不支持的文件编码，请使用 UTF-8 或 GBK 编码的文本文件") from last_decode_error
+
+    raise ValueError("读取文件失败")
 
 
 def write_text_lines(file_path: Path, lines: list[str]) -> None:
@@ -120,6 +132,9 @@ def main(argv: list[str]) -> int:
 
     try:
         lines = read_text_lines(file_path)
+    except ValueError as error:
+        print(f"错误: {error}")
+        return 1
     except OSError as error:
         print(f"错误: 读取文件失败: {error}")
         return 1
