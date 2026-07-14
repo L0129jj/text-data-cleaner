@@ -15,6 +15,20 @@ def print_lines(lines: list[str]) -> None:
         print(line, end="")
 
 
+def trim_edge_blank_lines(lines: list[str]) -> list[str]:
+    """Remove only the leading and trailing blank lines."""
+    start = 0
+    end = len(lines)
+
+    while start < end and not lines[start].strip():
+        start += 1
+
+    while end > start and not lines[end - 1].strip():
+        end -= 1
+
+    return lines[start:end]
+
+
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
         print("用法: python clean.py [文件路径]")
@@ -33,6 +47,7 @@ def main(argv: list[str]) -> int:
         print(f"错误: 读取文件失败: {error}")
         return 1
 
+    lines = trim_edge_blank_lines(lines)
     print_lines(lines)
     return 0
 
