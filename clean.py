@@ -34,6 +34,18 @@ def remove_blank_lines(lines: list[str]) -> list[str]:
     return [line for line in lines if line.strip()]
 
 
+def strip_line_chars(lines: list[str], chars: str) -> list[str]:
+    """Strip the specified characters from both ends of each line."""
+    stripped_lines: list[str] = []
+
+    for line in lines:
+        line_break = "\n" if line.endswith("\n") else ""
+        content = line[:-1] if line_break else line
+        stripped_lines.append(content.strip(chars) + line_break)
+
+    return stripped_lines
+
+
 def remove_duplicate_lines(lines: list[str], ignore_case: bool = False) -> list[str]:
     """Keep only the first occurrence of each line."""
     seen: set[str] = set()
@@ -51,14 +63,21 @@ def remove_duplicate_lines(lines: list[str], ignore_case: bool = False) -> list[
 
 def main(argv: list[str]) -> int:
     ignore_case = False
+    strip_chars = ""
     args = argv[1:]
 
     if "--ignore-case" in args:
         ignore_case = True
         args.remove("--ignore-case")
 
+    for arg in args[:]:
+        if arg.startswith("--strip-chars="):
+            strip_chars = arg.split("=", 1)[1]
+            args.remove(arg)
+            break
+
     if len(args) != 1:
-        print("用法: python clean.py [--ignore-case] [文件路径]")
+        print("用法: python clean.py [--ignore-case] [--strip-chars=字符集合] [文件路径]")
         return 1
 
     file_path = args[0]
@@ -74,6 +93,8 @@ def main(argv: list[str]) -> int:
         print(f"错误: 读取文件失败: {error}")
         return 1
 
+    if strip_chars:
+        lines = strip_line_chars(lines, strip_chars)
     lines = trim_edge_blank_lines(lines)
     lines = remove_blank_lines(lines)
     lines = remove_duplicate_lines(lines, ignore_case=ignore_case)
