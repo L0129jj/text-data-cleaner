@@ -9,10 +9,10 @@ def read_text_lines(file_path: str) -> list[str]:
         return file.readlines()
 
 
-def print_lines(lines: list[str]) -> None:
-    """Print file content line by line without adding extra blank lines."""
-    for line in lines:
-        print(line, end="")
+def write_text_lines(file_path: Path, lines: list[str]) -> None:
+    """Write text lines to a UTF-8 file."""
+    with file_path.open("w", encoding="utf-8") as file:
+        file.writelines(lines)
 
 
 def print_report(
@@ -75,14 +75,28 @@ def remove_duplicate_lines(lines: list[str], ignore_case: bool = False) -> list[
     return unique_lines
 
 
+def build_default_output_path(input_path: Path) -> Path:
+    """Build the default output path beside the input file."""
+    return input_path.with_name(f"{input_path.stem}_cleaned{input_path.suffix}")
+
+
 def main(argv: list[str]) -> int:
     ignore_case = False
     strip_chars = ""
+    output_path: Path | None = None
     args = argv[1:]
 
     if "--ignore-case" in args:
         ignore_case = True
         args.remove("--ignore-case")
+
+    if "-o" in args:
+        option_index = args.index("-o")
+        if option_index == len(args) - 1:
+            print("错误: -o 参数后必须提供输出文件路径")
+            return 1
+        output_path = Path(args[option_index + 1])
+        del args[option_index : option_index + 2]
 
     for arg in args[:]:
         if arg.startswith("--strip-chars="):
@@ -91,15 +105,18 @@ def main(argv: list[str]) -> int:
             break
 
     if len(args) != 1:
-        print("用法: python clean.py [--ignore-case] [--strip-chars=字符集合] [文件路径]")
+        print("用法: python clean.py [--ignore-case] [--strip-chars=字符集合] [-o 输出文件] [文件路径]")
         return 1
 
     file_path = args[0]
-    path = Path(file_path)
+    input_path = Path(file_path)
 
-    if not path.is_file():
+    if not input_path.is_file():
         print(f"错误: 文件不存在或无法访问: {file_path}")
         return 1
+
+    if output_path is None:
+        output_path = build_default_output_path(input_path)
 
     try:
         lines = read_text_lines(file_path)
@@ -121,7 +138,13 @@ def main(argv: list[str]) -> int:
     lines = remove_duplicate_lines(lines, ignore_case=ignore_case)
     removed_duplicate_line_count = line_count_before_dedup - len(lines)
 
-    print_lines(lines)
+    try:
+        write_text_lines(output_path, lines)
+    except OSError as error:
+        print(f"错误: 写入文件失败: {error}")
+        return 1
+
+    print(f"已生成清洗结果文件: {output_path}")
     print_report(
         original_line_count=original_line_count,
         cleaned_line_count=len(lines),
