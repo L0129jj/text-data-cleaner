@@ -15,6 +15,20 @@ def print_lines(lines: list[str]) -> None:
         print(line, end="")
 
 
+def print_report(
+    original_line_count: int,
+    cleaned_line_count: int,
+    removed_blank_line_count: int,
+    removed_duplicate_line_count: int,
+) -> None:
+    """Print a summary report for the cleaning process."""
+    print("\n清洗报告:")
+    print(f"原始总行数: {original_line_count}")
+    print(f"清洗后行数: {cleaned_line_count}")
+    print(f"去除空行数: {removed_blank_line_count}")
+    print(f"去除重复行数: {removed_duplicate_line_count}")
+
+
 def trim_edge_blank_lines(lines: list[str]) -> list[str]:
     """Remove only the leading and trailing blank lines."""
     start = 0
@@ -93,12 +107,27 @@ def main(argv: list[str]) -> int:
         print(f"错误: 读取文件失败: {error}")
         return 1
 
+    original_line_count = len(lines)
+
     if strip_chars:
         lines = strip_line_chars(lines, strip_chars)
     lines = trim_edge_blank_lines(lines)
+
+    line_count_before_blank_cleanup = len(lines)
     lines = remove_blank_lines(lines)
+    removed_blank_line_count = line_count_before_blank_cleanup - len(lines)
+
+    line_count_before_dedup = len(lines)
     lines = remove_duplicate_lines(lines, ignore_case=ignore_case)
+    removed_duplicate_line_count = line_count_before_dedup - len(lines)
+
     print_lines(lines)
+    print_report(
+        original_line_count=original_line_count,
+        cleaned_line_count=len(lines),
+        removed_blank_line_count=removed_blank_line_count,
+        removed_duplicate_line_count=removed_duplicate_line_count,
+    )
     return 0
 
 
