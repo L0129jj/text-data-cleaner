@@ -34,26 +34,34 @@ def remove_blank_lines(lines: list[str]) -> list[str]:
     return [line for line in lines if line.strip()]
 
 
-def remove_duplicate_lines(lines: list[str]) -> list[str]:
+def remove_duplicate_lines(lines: list[str], ignore_case: bool = False) -> list[str]:
     """Keep only the first occurrence of each line."""
     seen: set[str] = set()
     unique_lines: list[str] = []
 
     for line in lines:
-        if line in seen:
+        key = line.lower() if ignore_case else line
+        if key in seen:
             continue
-        seen.add(line)
+        seen.add(key)
         unique_lines.append(line)
 
     return unique_lines
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) != 2:
-        print("用法: python clean.py [文件路径]")
+    ignore_case = False
+    args = argv[1:]
+
+    if "--ignore-case" in args:
+        ignore_case = True
+        args.remove("--ignore-case")
+
+    if len(args) != 1:
+        print("用法: python clean.py [--ignore-case] [文件路径]")
         return 1
 
-    file_path = argv[1]
+    file_path = args[0]
     path = Path(file_path)
 
     if not path.is_file():
@@ -68,7 +76,7 @@ def main(argv: list[str]) -> int:
 
     lines = trim_edge_blank_lines(lines)
     lines = remove_blank_lines(lines)
-    lines = remove_duplicate_lines(lines)
+    lines = remove_duplicate_lines(lines, ignore_case=ignore_case)
     print_lines(lines)
     return 0
 
