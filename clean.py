@@ -29,6 +29,11 @@ def trim_edge_blank_lines(lines: list[str]) -> list[str]:
     return lines[start:end]
 
 
+def remove_blank_lines(lines: list[str]) -> list[str]:
+    """Remove all lines that are empty or contain only whitespace."""
+    return [line for line in lines if line.strip()]
+
+
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
         print("用法: python clean.py [文件路径]")
@@ -48,6 +53,7 @@ def main(argv: list[str]) -> int:
         return 1
 
     lines = trim_edge_blank_lines(lines)
+    lines = remove_blank_lines(lines)
     print_lines(lines)
     return 0
 
