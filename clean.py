@@ -34,6 +34,20 @@ def remove_blank_lines(lines: list[str]) -> list[str]:
     return [line for line in lines if line.strip()]
 
 
+def remove_duplicate_lines(lines: list[str]) -> list[str]:
+    """Keep only the first occurrence of each line."""
+    seen: set[str] = set()
+    unique_lines: list[str] = []
+
+    for line in lines:
+        if line in seen:
+            continue
+        seen.add(line)
+        unique_lines.append(line)
+
+    return unique_lines
+
+
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
         print("用法: python clean.py [文件路径]")
@@ -54,6 +68,7 @@ def main(argv: list[str]) -> int:
 
     lines = trim_edge_blank_lines(lines)
     lines = remove_blank_lines(lines)
+    lines = remove_duplicate_lines(lines)
     print_lines(lines)
     return 0
 
