@@ -188,6 +188,23 @@ JSONL 中每条记录包含以下字段：
 - 空文件
 - 输出文件生成情况
 
+为了便于项目查看者快速验证功能，当前根目录下额外提供了几份更适合展示的测试样例：
+
+- `test_input.txt`
+  基础综合样例，覆盖空行、重复行、大小写不同文本和首尾可裁剪字符。
+- `sample_basic.txt`
+  用于演示最常见的文本清洗场景：空行、重复行和前后空白。
+- `sample_ignore_case.txt`
+  用于测试 `--ignore-case`，例如 `Hello`、`hello`、`HELLO` 是否会被视为重复。
+- `sample_strip_chars.txt`
+  用于测试 `--strip-chars`，包含引号、逗号和括号等首尾字符。
+- `sample_empty.txt`
+  空文件，用于验证空文件不会导致程序崩溃。
+- `sample_large.txt`
+  较多行的普通文本样例，用于展示逐行处理逻辑和重复行过滤效果。
+- `sample_gbk.txt`
+  GBK 编码样例，用于验证编码回退能力。
+
 常见测试命令示例：
 
 ```powershell
@@ -195,6 +212,17 @@ python clean.py test_input.txt
 python clean.py --ignore-case test_input.txt
 python clean.py '--strip-chars=",' test_input.txt
 python clean.py -o output.txt test_input.txt
+```
+
+推荐展示命令：
+
+```powershell
+python clean.py sample_basic.txt
+python clean.py --ignore-case sample_ignore_case.txt
+python clean.py '--strip-chars=",()' sample_strip_chars.txt
+python clean.py sample_empty.txt
+python clean.py sample_large.txt
+python clean.py sample_gbk.txt
 ```
 
 ## 项目意义
